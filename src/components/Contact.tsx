@@ -16,7 +16,7 @@ const contactItems: ContactItem[] = [
     icon: 'MapPin',
     value: 'Pittsburgh, PA',
     label: 'Location',
-    copyable: false,
+    copyable: true,
   },
   {
     icon: 'Phone',

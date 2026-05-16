@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, ChevronRight, ExternalLink } from 'lucide-react';
 import { useClock } from '../hooks/useClock';
+
+import { Globe } from './Globe';
 
 const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
 const TARGET_NAME = 'Eric Han Wang';
@@ -13,104 +15,56 @@ export function Hero() {
     Array(TARGET_NAME.length).fill('')
   );
   const [decodePhase, setDecodePhase] = useState<'scrambling' | 'done'>('scrambling');
-  const [taglineVisible, setTaglineVisible] = useState(false);
 
-  // Mutable refs for animation state (avoids closure issues)
-  const lockedInRef = useRef<boolean[]>(Array(TARGET_NAME.length).fill(false));
-  const lockTimesRef = useRef<number[]>(
-    Array.from({ length: TARGET_NAME.length }, (_, i) =>
-      TOTAL_DURATION * (0.1 + 0.7 * (i / TARGET_NAME.length) + 0.2 * Math.random())
-    )
-  );
-  const startTimeRef = useRef<number>(0);
-  const intervalRef = useRef<number>(0);
-
-  // Hacker decode animation
+  // Hacker decode animation — uses direct state set (no functional updater)
+  // so that scramble mutations are visible synchronously
   useEffect(() => {
-    lockedInRef.current = Array(TARGET_NAME.length).fill(false);
-    lockTimesRef.current = Array.from({ length: TARGET_NAME.length }, (_, i) =>
+    const lockedIn = Array(TARGET_NAME.length).fill(false);
+    const lockTimes = Array.from({ length: TARGET_NAME.length }, (_, i) =>
       TOTAL_DURATION * (0.1 + 0.7 * (i / TARGET_NAME.length) + 0.2 * Math.random())
     );
-    startTimeRef.current = 0;
+
     setDecodePhase('scrambling');
     setDisplayChars(Array(TARGET_NAME.length).fill(''));
 
-    // Small delay before starting the scramble
+    const startTime = performance.now();
+    let intervalId: number;
+
+    function tick() {
+      const elapsed = performance.now() - startTime;
+      let allDone = true;
+      const next: string[] = [];
+
+      for (let i = 0; i < TARGET_NAME.length; i++) {
+        if (lockedIn[i]) {
+          next.push(TARGET_NAME[i]);
+        } else if (elapsed >= lockTimes[i]) {
+          lockedIn[i] = true;
+          next.push(TARGET_NAME[i]);
+        } else {
+          next.push(CHARSET[Math.floor(Math.random() * CHARSET.length)]);
+          allDone = false;
+        }
+      }
+
+      setDisplayChars(next);
+
+      if (allDone) {
+        clearInterval(intervalId);
+        setDecodePhase('done');
+      }
+    }
+
+    // Small delay before scramble begins so the hero entry animation plays first
     const startDelay = setTimeout(() => {
-      startTimeRef.current = performance.now();
-
-      intervalRef.current = setInterval(() => {
-        const elapsed = performance.now() - startTimeRef.current;
-        const lockedIn = lockedInRef.current;
-        const lockTimes = lockTimesRef.current;
-
-        setDisplayChars((prev) => {
-          const newChars = [...prev];
-          for (let i = 0; i < TARGET_NAME.length; i++) {
-            if (lockedIn[i]) continue;
-            if (elapsed >= lockTimes[i]) {
-              lockedIn[i] = true;
-              newChars[i] = TARGET_NAME[i];
-            } else {
-              newChars[i] = CHARSET[Math.floor(Math.random() * CHARSET.length)];
-            }
-          }
-          return newChars;
-        });
-
-        // If we’ve reached the end, force-resolve to the target string character-by-character
-        // (Prevents leaving tail chars scrambled, while keeping the “one at a time” feel.)
-        if (elapsed >= TOTAL_DURATION) {
-          clearInterval(intervalRef.current);
-
-          // Build final chars in a final tick sequence so it doesn’t jump all at once.
-          lockedInRef.current = Array(TARGET_NAME.length).fill(true);
-          const finalChars = Array.from(TARGET_NAME);
-
-          // Start from whatever we have right now.
-          setDisplayChars((prev) => [...prev]);
-
-          let idx = 0;
-          const finalTimer = window.setInterval(() => {
-            idx++;
-            setDisplayChars((prev) => {
-              const next = [...prev];
-              for (let j = 0; j < idx; j++) next[j] = finalChars[j];
-              return next;
-            });
-            if (idx >= finalChars.length) {
-              window.clearInterval(finalTimer);
-              setDisplayChars(finalChars);
-              setDecodePhase('done');
-            }
-          }, TICK_MS);
-
-          return;
-        }
-
-        // Check if all chars are locked (usually happens right around TOTAL_DURATION)
-        if (lockedIn.every(Boolean)) {
-          clearInterval(intervalRef.current);
-          setDisplayChars(Array.from(TARGET_NAME));
-          setDecodePhase('done');
-          return;
-        }
-      }, TICK_MS);
-    }, 200);
+      intervalId = window.setInterval(tick, TICK_MS);
+    }, 300);
 
     return () => {
       clearTimeout(startDelay);
-      clearInterval(intervalRef.current);
+      clearInterval(intervalId);
     };
   }, []);
-
-  // Tagline fade in after decode
-  useEffect(() => {
-    if (decodePhase === 'done') {
-      const t = setTimeout(() => setTaglineVisible(true), 200);
-      return () => clearTimeout(t);
-    }
-  }, [decodePhase]);
 
   const timeStr = time.toLocaleTimeString('en-US', {
     hour: '2-digit',
@@ -121,16 +75,15 @@ export function Hero() {
   });
 
   const taglineItems = [
-    { text: 'CS + AI @ Carnegie Mellon University' },
-    { text: 'Research: Neuromorphic Computing \u00b7 Quantum Systems \u00b7 Bio-Inspired Architectures' },
+    { text: 'CS + AI @ Carnegie Mellon University \'2030' },
+    { text: 'Neuromorphic Computing \u00b7 Quantum Systems \u00b7 Bio-Inspired Architectures' },
     { text: 'Building at the intersection of computation and nature' },
   ];
 
   const stats = [
     { value: '100+', label: 'Repos' },
-    { value: '15+', label: 'Languages' },
+    { value: '20+', label: 'Languages' },
     { value: '3', label: 'Research Areas' },
-    { value: "CMU CS+AI '30", label: 'University' },
   ];
 
   const getLetterColor = (char: string, i: number) => {
@@ -140,7 +93,7 @@ export function Hero() {
   };
 
   return (
-    <section className="min-h-screen flex flex-col justify-center px-5 md:px-10 max-w-[960px] mx-auto relative">
+    <section className="min-h-screen flex items-center px-5 md:px-10 max-w-[1200px] mx-auto relative">
       {/* Ambient glow */}
       <div
         className="absolute top-[20%] -left-[10%] w-[500px] h-[500px] pointer-events-none"
@@ -149,8 +102,9 @@ export function Hero() {
         }}
       />
 
+      {/* Left content column */}
       <div
-        className="opacity-0 translate-y-[30px]"
+        className="flex-1 min-w-0 opacity-0 translate-y-[30px]"
         style={{ animation: 'heroEnter 0.9s cubic-bezier(0.4,0,0.2,1) forwards' }}
       >
         {/* Location + Clock */}
@@ -188,9 +142,9 @@ export function Hero() {
             fontSize: 'clamp(42px, 7vw, 72px)',
             fontWeight: 800,
             fontFamily: "'Ma Shan Zheng', 'ZCOOL XiaoWei', cursive",
-            opacity: decodePhase === 'done' ? 1 : 0,
-            transform: decodePhase === 'done' ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'all 0.8s ease 0.3s',
+            opacity: 0,
+            transform: 'translateY(20px)',
+            animation: 'chineseEnter 0.8s ease 0.5s forwards',
           }}
         >
           {'\u738B\u7FF0'}
@@ -199,20 +153,14 @@ export function Hero() {
         {/* Tagline */}
         <ul
           className="mt-7 space-y-2.5 max-w-[580px] list-none p-0"
-          style={{
-            opacity: taglineVisible ? 1 : 0,
-            transform: taglineVisible ? 'translateY(0)' : 'translateY(12px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
-          }}
         >
           {taglineItems.map((item, i) => (
             <li
               key={i}
               className="flex items-start gap-2 text-[15px] md:text-[17px] text-[--text-secondary] font-body leading-relaxed"
               style={{
-                opacity: taglineVisible ? 1 : 0,
-                transform: taglineVisible ? 'translateY(0)' : 'translateY(8px)',
-                transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`,
+                opacity: 0,
+                animation: `taglineEnter 0.5s ease ${0.3 + i * 0.1}s forwards`,
               }}
             >
               <ChevronRight size={16} color="var(--accent-blue)" className="mt-0.5 shrink-0" />
@@ -225,8 +173,8 @@ export function Hero() {
         <div
           className="flex flex-wrap gap-3.5 mt-9"
           style={{
-            opacity: taglineVisible ? 1 : 0,
-            transition: 'opacity 0.5s ease 0.3s',
+            opacity: 0,
+            animation: 'taglineEnter 0.5s ease 0.8s forwards',
           }}
         >
           <a
@@ -272,8 +220,8 @@ export function Hero() {
         <div
           className="flex flex-wrap gap-8 md:gap-12 mt-[52px] pt-8 border-t border-[--border-subtle]"
           style={{
-            opacity: taglineVisible ? 1 : 0,
-            transition: 'opacity 0.5s ease 0.5s',
+            opacity: 0,
+            animation: 'taglineEnter 0.5s ease 1.0s forwards',
           }}
         >
           {stats.map((stat) => (
@@ -292,9 +240,22 @@ export function Hero() {
         </div>
       </div>
 
+      {/* Right side — 3D Globe (hidden on mobile) */}
+      <div className="hidden md:block w-[340px] lg:w-[420px] shrink-0 ml-4 lg:ml-8">
+        <Globe />
+      </div>
+
       <style>{`
         @keyframes heroEnter {
           from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes chineseEnter {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes taglineEnter {
+          from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>

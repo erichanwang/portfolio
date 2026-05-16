@@ -37,15 +37,4 @@ export const researchAreas: ResearchArea[] = [
   },
 ];
 
-export const awards = [
-  { year: 2025, text: 'AIME National Qualifier' },
-  { year: 2025, text: 'BPA National Alternate — Python' },
-  { year: 2025, text: 'GARSEF Regional Finalist — 2nd Place (Materials Science)' },
-  { year: 2025, text: 'TXSEF Regional Finalist — 3rd Place (Materials Science)' },
-  { year: 2025, text: 'TEAMS National Qualifier' },
-  { year: 2025, text: 'UT Austin CS Machine-Learning Program' },
-  { year: 2023, text: 'Yale SIG Camp — Neuroscience & Regenerative Medicine' },
-  { year: 2022, text: 'Texas A&M STEM Research Camp' },
-];
-
-// TODO: Eric to confirm which awards to include
+// TODO: Replace with collegiate awards and activities (no high school items)

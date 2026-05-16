@@ -1,6 +1,4 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { researchAreas, awards } from '../data/research';
+import { researchAreas } from '../data/research';
 import { useInView } from '../hooks/useInView';
 
 function ResearchItem({
@@ -38,7 +36,6 @@ function ResearchItem({
 }
 
 export function Research() {
-  const [awardsOpen, setAwardsOpen] = useState(false);
   const [sectionRef, sectionVisible] = useInView(0.05);
 
   return (
@@ -61,50 +58,7 @@ export function Research() {
         ))}
       </div>
 
-      {/* Awards & Activity Accordion */}
-      <div
-        className="mt-10 border border-[--border-subtle] rounded-2xl overflow-hidden"
-        style={{ background: 'var(--bg-surface)' }}
-      >
-        <button
-          onClick={() => setAwardsOpen(!awardsOpen)}
-          className="w-full flex items-center gap-2 px-7 py-5 bg-transparent border-none cursor-pointer text-left hover:bg-[--bg-hover] transition-colors"
-        >
-          <span className="text-[14px] font-semibold text-[--text-primary] font-display tracking-[-0.01em]">
-            {awardsOpen ? '\u25BC' : '\u25B6'}  Awards & Activity
-          </span>
-        </button>
 
-        <AnimatePresence>
-          {awardsOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="px-7 pb-6 space-y-0">
-                {awards.map((award, i) => (
-                  <div
-                    key={i}
-                    className={`flex gap-4 py-3 ${
-                      i < awards.length - 1 ? 'border-b border-[--border-subtle]' : ''
-                    }`}
-                  >
-                    <span className="text-[12px] text-[--text-muted] font-mono shrink-0 w-[44px]">
-                      {award.year}
-                    </span>
-                    <span className="text-[13.5px] text-[--text-secondary] font-body leading-relaxed">
-                      {award.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
     </section>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Menu } from 'lucide-react';
 import { LogoPlaceholder } from '../assets/LogoPlaceholder';
 
@@ -56,10 +56,22 @@ export function Navbar() {
           background: scrolled ? 'rgba(14,21,32,0.85)' : 'transparent',
         }}
       >
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 no-underline" aria-label="Home">
+        {/* Logo — click to scroll to top */}
+        <a
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            if (location.pathname === '/') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              navigate('/');
+            }
+          }}
+          className="flex items-center gap-2 no-underline"
+          aria-label="Scroll to top"
+        >
           <LogoPlaceholder size={32} />
-        </Link>
+        </a>
 
         {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-8">
