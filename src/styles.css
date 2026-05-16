@@ -1,0 +1,203 @@
+/* ── Google Fonts ───────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&display=swap');
+
+/* ── Tailwind Directives ────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design System CSS Variables ───────────────────────────────────── */
+:root {
+  --bg-base:        #0e1520;
+  --bg-surface:     #131c2a;
+  --bg-hover:       #1a2438;
+  --accent-blue:    #4fc3f7;
+  --accent-purple:  #ce93d8;
+  --accent-teal:    #80cbc4;
+  --text-primary:   #f0f4f8;
+  --text-secondary: rgba(240, 244, 248, 0.55);
+  --text-muted:     rgba(240, 244, 248, 0.30);
+  --border-subtle:  rgba(255, 255, 255, 0.07);
+  --border-hover:   rgba(79, 195, 247, 0.30);
+  --glow-blue:      rgba(79, 195, 247, 0.12);
+}
+
+/* ── Base Resets ────────────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Section Labels ─────────────────────────────────────────────────── */
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.section-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+  min-width: 20px;
+}
+
+/* ── Hero Glow ──────────────────────────────────────────────────────── */
+.hero-name-glow {
+  text-shadow:
+    0 0 40px rgba(79, 195, 247, 0.25),
+    0 0 80px rgba(79, 195, 247, 0.10);
+}
+
+/* ── Pulse Dot Animation ────────────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── Subtle Background Grid ─────────────────────────────────────────── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ── Frosted Glass ──────────────────────────────────────────────────── */
+.glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Chinese Name Gradient ──────────────────────────────────────────── */
+.chinese-gradient {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Hacker Decode Letter ───────────────────────────────────────────── */
+.decode-letter {
+  display: inline;
+  font-family: 'Space Grotesk', 'DM Sans', sans-serif;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* ── Project Card ───────────────────────────────────────────────────── */
+.project-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.project-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+  box-shadow: 0 0 32px var(--glow-blue);
+}
+
+/* ── Skill Pill ─────────────────────────────────────────────────────── */
+.skill-pill {
+  transition: all 0.25s ease;
+}
+
+.skill-pill:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 0 12px var(--glow-blue);
+}
+
+/* ── CTA Button Base ────────────────────────────────────────────────── */
+.cta-filled {
+  background: var(--accent-blue);
+  color: #0a1628;
+  transition: all 0.2s ease;
+}
+
+.cta-filled:hover {
+  background: #81d4fa;
+  transform: translateY(-1px);
+}
+
+.cta-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.cta-ghost:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+/* ── Tab Styles ─────────────────────────────────────────────────────── */
+.skills-tab {
+  transition: color 0.2s ease;
+}
+
+.skills-tab.active {
+  color: var(--accent-blue);
+  border-bottom: 2px solid var(--accent-blue);
+}
+
+/* ── Research Color Bar ─────────────────────────────────────────────── */
+.research-bar {
+  width: 3px;
+  border-radius: 2px;
+}
+
+/* ── Contact Row ────────────────────────────────────────────────────── */
+.contact-row {
+  transition: background 0.2s ease;
+}
+
+.contact-row:hover {
+  background: var(--bg-hover);
+}
+
+.copy-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.contact-row:hover .copy-btn {
+  opacity: 1;
+}
+
+/* ── Hamburger ──────────────────────────────────────────────────────── */
+.hamburger-line {
+  transition: all 0.3s ease;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .hero-name {
+    font-size: clamp(42px, 12vw, 62px) !important;
+  }
+  .hero-chinese {
+    font-size: clamp(36px, 10vw, 54px) !important;
+  }
+}
