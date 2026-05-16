@@ -52,12 +52,13 @@ export const skillCategories: SkillCategory[] = [
     label: 'Engineering & Modeling',
     skills: [
       'COMSOL Multiphysics', 'SolidWorks', 'Onshape', 'CAD / CAM',
+      '3D Modeling & Design', 'Multi-Axial 3D Printing',
       'Finite Element Analysis (FEA)', 'ODE / PDE Modeling',
       'Numerical Analysis', 'Computational Mathematics',
       'Circuit Analysis', 'Electronics Prototyping',
       'Embedded Systems', 'Arduino', 'Raspberry Pi',
       'Microcontroller Programming', 'Sensor Integration',
-      'MATLAB / MathWorks',
+      'MATLAB / MathWorks', 'STEM Olympiads',
     ],
   },
 ];

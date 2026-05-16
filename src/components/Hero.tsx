@@ -71,7 +71,7 @@ export function Hero() {
     minute: '2-digit',
     second: '2-digit',
     hour12: true,
-    timeZone: 'America/Chicago',
+    timeZone: 'America/New_York',
   });
 
   const taglineItems = [
@@ -115,7 +115,7 @@ export function Hero() {
           />
           <MapPin size={12} color="var(--accent-blue)" />
           <span className="font-mono text-[12.5px] text-[--text-muted] tracking-[0.04em]">
-            Pittsburgh, PA {'\u00b7'} UTC-5 CDT {'\u00b7'} {timeStr}
+            Pittsburgh, PA {'\u00b7'} EST/EDT {'\u00b7'} {timeStr}
           </span>
         </div>
 
@@ -140,7 +140,7 @@ export function Hero() {
           className="mt-1 leading-none tracking-[-0.04em] chinese-gradient"
           style={{
             fontSize: 'clamp(42px, 7vw, 72px)',
-            fontWeight: 800,
+            fontWeight: 500,
             fontFamily: "'Ma Shan Zheng', 'ZCOOL XiaoWei', cursive",
             opacity: 0,
             transform: 'translateY(20px)',
@@ -241,7 +241,7 @@ export function Hero() {
       </div>
 
       {/* Right side — 3D Globe (hidden on mobile) */}
-      <div className="hidden md:block w-[340px] lg:w-[420px] shrink-0 ml-4 lg:ml-8">
+      <div className="hidden md:block w-[440px] lg:w-[580px] shrink-0 ml-4 lg:ml-8 sticky top-24 self-start">
         <Globe />
       </div>
 

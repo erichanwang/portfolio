@@ -1,309 +1,179 @@
-import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
-import { CONTINENTS } from '../data/continents';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { GraduationCap } from 'lucide-react';
+import GlobeGL from 'react-globe.gl';
 
 // Pittsburgh, PA coordinates
 const PITTSBURGH_LAT = 40.44;
 const PITTSBURGH_LON = -79.99;
 
-function latLonToVec3(lat: number, lon: number, radius: number): THREE.Vector3 {
-  const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lon + 180) * (Math.PI / 180);
-  return new THREE.Vector3(
-    -radius * Math.sin(phi) * Math.cos(theta),
-    radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta),
-  );
+// Night earth texture — dark globe with city lights, fits the portfolio theme
+const GLOBE_IMAGE_URL = '//unpkg.com/three-globe/example/img/earth-night.jpg';
+
+interface CityDot {
+  lat: number;
+  lng: number;
+  size: number;
+  color: string;
 }
 
 export function Globe() {
-  const mountRef = useRef<HTMLDivElement>(null);
+  const globeEl = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [dims, setDims] = useState({ w: 340, h: 380 });
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [pghTime, setPghTime] = useState('');
 
-  useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return;
-
-    // ── Scene, camera, renderer ─────────────────────────────
-    const scene = new THREE.Scene();
-
-    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
-    camera.position.set(0, 0, 7);
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0x000000, 0);
-    container.appendChild(renderer.domElement);
-
-    // ── Globe group ─────────────────────────────────────────
-    const globeGroup = new THREE.Group();
-    scene.add(globeGroup);
-
-    const radius = 1.6;
-
-    // Wireframe sphere
-    const sphereGeo = new THREE.SphereGeometry(radius, 48, 32);
-    const sphereWire = new THREE.LineSegments(
-      new THREE.WireframeGeometry(sphereGeo),
-      new THREE.LineBasicMaterial({
-        color: 0x4fc3f7,
-        opacity: 0.08,
-        transparent: true,
-      }),
+  // ── Live Pittsburgh clock for popup ──────────────────
+  const updatePghTime = useCallback(() => {
+    setPghTime(
+      new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+        timeZone: 'America/New_York',
+      })
     );
-    globeGroup.add(sphereWire);
+  }, []);
 
-    // Latitude rings
-    for (let lat = -60; lat <= 60; lat += 30) {
-      const ringRadius = radius * Math.cos((lat * Math.PI) / 180);
-      const y = radius * Math.sin((lat * Math.PI) / 180);
-      const ringGeo = new THREE.TorusGeometry(ringRadius, 0.01, 16, 80);
-      const ring = new THREE.Mesh(
-        ringGeo,
-        new THREE.MeshBasicMaterial({
-          color: 0x4fc3f7,
-          opacity: 0.12,
-          transparent: true,
-        }),
-      );
-      ring.position.y = y;
-      ring.rotation.x = Math.PI / 2;
-      globeGroup.add(ring);
-    }
-
-    // Longitude rings
-    for (let lon = 0; lon < 180; lon += 30) {
-      const ringGeo = new THREE.TorusGeometry(radius, 0.01, 16, 80);
-      const ring = new THREE.Mesh(
-        ringGeo,
-        new THREE.MeshBasicMaterial({
-          color: 0x4fc3f7,
-          opacity: 0.1,
-          transparent: true,
-        }),
-      );
-      ring.rotation.y = (lon * Math.PI) / 180;
-      globeGroup.add(ring);
-    }
-
-    // ── Continent outlines & filled landmasses ─────────────
-    const continentGroup = new THREE.Group();
-
-    // Shared materials
-    const outlineMat = new THREE.LineBasicMaterial({
-      color: 0x4fc3f7,
-      opacity: 0.5,
-      transparent: true,
-    });
-    const fillMat = new THREE.MeshBasicMaterial({
-      color: 0x4fc3f7,
-      opacity: 0.06,
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
-
-    for (const continent of CONTINENTS) {
-      for (const ring of continent.rings) {
-        // Project outline points to 3D, slightly above sphere surface
-        const outlinePts = ring.map(([lon, lat]) =>
-          latLonToVec3(lat, lon, radius * 1.006),
-        );
-
-        // Continent outline — use LineLoop to close the polygon
-        const outlineGeo = new THREE.BufferGeometry().setFromPoints(outlinePts);
-        const outline = new THREE.LineLoop(outlineGeo, outlineMat);
-        continentGroup.add(outline);
-
-        // Filled landmass — fan triangulation from 3D centroid
-        if (outlinePts.length >= 3) {
-          // Compute centroid of projected points, then re-normalize to sphere surface
-          const centroid = new THREE.Vector3();
-          for (const p of outlinePts) centroid.add(p);
-          centroid.divideScalar(outlinePts.length);
-          centroid.normalize().multiplyScalar(radius * 1.004);
-
-          // Fan triangles: centroid → edge[i] → edge[i+1]
-          const verts: number[] = [];
-          for (let i = 0; i < outlinePts.length; i++) {
-            const curr = outlinePts[i];
-            const next = outlinePts[(i + 1) % outlinePts.length];
-            verts.push(
-              centroid.x, centroid.y, centroid.z,
-              curr.x, curr.y, curr.z,
-              next.x, next.y, next.z,
-            );
-          }
-
-          const fillGeo = new THREE.BufferGeometry();
-          fillGeo.setAttribute(
-            'position',
-            new THREE.Float32BufferAttribute(verts, 3),
-          );
-          fillGeo.computeVertexNormals();
-          const fill = new THREE.Mesh(fillGeo, fillMat);
-          continentGroup.add(fill);
-        }
-      }
-    }
-    globeGroup.add(continentGroup);
-
-    // ── Sparse ambient dots on oceans ──────────────────────
-    const dotsGroup = new THREE.Group();
-    const dotGeo = new THREE.SphereGeometry(0.018, 4, 4);
-    const dotMat = new THREE.MeshBasicMaterial({ color: 0x4fc3f7, opacity: 0.35, transparent: true });
-
-    // City dot clusters
-    const clusters = [
-      { lat: 40.44, lon: -79.99 }, // Pittsburgh
-      { lat: 40.71, lon: -74.01 }, // New York
-      { lat: 51.51, lon: -0.13 },  // London
-      { lat: 35.68, lon: 139.76 }, // Tokyo
-      { lat: 37.77, lon: -122.42 },// San Francisco
-      { lat: -33.87, lon: 151.21 },// Sydney
-      { lat: 55.75, lon: 37.62 },  // Moscow
-      { lat: 19.43, lon: -99.13 }, // Mexico City
-    ];
-
-    for (const cluster of clusters) {
-      for (let j = 0; j < 6; j++) {
-        const spreadLat = cluster.lat + (Math.random() - 0.5) * 3;
-        const spreadLon = cluster.lon + (Math.random() - 0.5) * 3;
-        const dot = new THREE.Mesh(dotGeo, dotMat);
-        dot.position.copy(latLonToVec3(spreadLat, spreadLon, radius * 1.003));
-        dotsGroup.add(dot);
-      }
-    }
-    globeGroup.add(dotsGroup);
-
-    // ── Pittsburgh marker ───────────────────────────────────
-    const markerGroup = new THREE.Group();
-    const pghPos = latLonToVec3(PITTSBURGH_LAT, PITTSBURGH_LON, radius);
-    markerGroup.position.copy(pghPos);
-
-    // Glowing core dot
-    const coreGeo = new THREE.SphereGeometry(0.06, 16, 16);
-    const coreMat = new THREE.MeshBasicMaterial({ color: 0x4fc3f7 });
-    const core = new THREE.Mesh(coreGeo, coreMat);
-    markerGroup.add(core);
-
-    // Outer glow ring
-    const ringGeo = new THREE.TorusGeometry(0.1, 0.015, 8, 24);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x4fc3f7,
-      opacity: 0.7,
-      transparent: true,
-    });
-    const glowRing = new THREE.Mesh(ringGeo, ringMat);
-    markerGroup.add(glowRing);
-
-    // Pulsing outer ring
-    const pulseRingGeo = new THREE.TorusGeometry(0.14, 0.01, 8, 32);
-    const pulseRingMat = new THREE.MeshBasicMaterial({
-      color: 0x80cbc4,
-      opacity: 0.5,
-      transparent: true,
-    });
-    const pulseRing = new THREE.Mesh(pulseRingGeo, pulseRingMat);
-    markerGroup.add(pulseRing);
-
-    globeGroup.add(markerGroup);
-
-    // ── Subtle ambient particles ────────────────────────────
-    const particlesGeo = new THREE.BufferGeometry();
-    const particlesCount = 60;
-    const positionsArray = new Float32Array(particlesCount * 3);
-    for (let i = 0; i < particlesCount * 3; i += 3) {
-      const r = radius + 0.3 + Math.random() * 2;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positionsArray[i] = r * Math.sin(phi) * Math.cos(theta);
-      positionsArray[i + 1] = r * Math.sin(phi) * Math.sin(theta);
-      positionsArray[i + 2] = r * Math.cos(phi);
-    }
-    particlesGeo.setAttribute('position', new THREE.BufferAttribute(positionsArray, 3));
-    const particlesMat = new THREE.PointsMaterial({
-      color: 0x4fc3f7,
-      size: 0.02,
-      opacity: 0.3,
-      transparent: true,
-    });
-    const particles = new THREE.Points(particlesGeo, particlesMat);
-    globeGroup.add(particles);
-
-    // ── Animation loop ──────────────────────────────────────
-    let animationId: number;
-    const clock = new THREE.Clock();
-
-    function animate() {
-      animationId = requestAnimationFrame(animate);
-
-      const delta = clock.getDelta();
-      // Slow auto-rotation
-      globeGroup.rotation.y += delta * 0.12;
-
-      // Pulse the marker rings
-      const time = clock.getElapsedTime();
-      const pulse = 1 + Math.sin(time * 2) * 0.25;
-      pulseRing.scale.setScalar(pulse);
-      pulseRingMat.opacity = 0.3 + Math.sin(time * 2) * 0.2;
-
-      // Gentle glow ring rotation
-      glowRing.rotation.x += delta * 0.5;
-      glowRing.rotation.y += delta * 0.3;
-
-      renderer.render(scene, camera);
-    }
-
-    // Initial rotation to make Pittsburgh face camera
-    const targetLon = PITTSBURGH_LON * (Math.PI / 180);
-    globeGroup.rotation.y = targetLon + Math.PI / 2;
-    globeGroup.rotation.x = 0.3; // slight tilt
-
-    animate();
-
-    // ── Resize handler ──────────────────────────────────────
-    const onResize = () => {
-      if (!container) return;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      camera.aspect = w / Math.max(h, 1);
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener('resize', onResize);
-
-    // ── Cleanup ─────────────────────────────────────────────
+  // Cleanup hide timer on unmount
+  useEffect(() => {
     return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', onResize);
-      renderer.dispose();
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
-      }
-      // Dispose geometries and materials
-      scene.traverse((obj) => {
-        if (obj instanceof THREE.Mesh || obj instanceof THREE.Line) {
-          obj.geometry.dispose();
-          if (Array.isArray(obj.material)) {
-            obj.material.forEach((m) => m.dispose());
-          } else {
-            (obj.material as THREE.Material).dispose();
-          }
-        }
-        if (obj instanceof THREE.Points) {
-          obj.geometry.dispose();
-          (obj.material as THREE.Material).dispose();
-        }
-      });
+      if (hideTimer.current) clearTimeout(hideTimer.current);
     };
   }, []);
 
+  useEffect(() => {
+    if (!popupVisible) return;
+    updatePghTime();
+    const id = setInterval(updatePghTime, 1000);
+    return () => clearInterval(id);
+  }, [popupVisible, updatePghTime]);
+
+  // ── Responsive sizing via ResizeObserver ──────────────
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) {
+        setDims({ w: width, h: height });
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // ── Point globe at Pittsburgh + slow auto-rotation ────
+  useEffect(() => {
+    const el = globeEl.current;
+    if (!el) return;
+
+    // Delay so the globe initializes first
+    const timer = setTimeout(() => {
+      // Point camera at Pittsburgh initially
+      el.pointOfView({ lat: PITTSBURGH_LAT, lng: PITTSBURGH_LON, altitude: 2.2 }, 1500);
+
+      // Enable auto-rotation with momentum (slippery drag)
+      const controls = el.controls();
+      if (controls) {
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.45;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // ── Pittsburgh marker — bright yellow, only city shown ──
+  const points: CityDot[] = [
+    { lat: PITTSBURGH_LAT, lng: PITTSBURGH_LON, size: 0.12, color: 'rgba(204,255,0,0.35)' },
+  ];
+
+  // ── Pulsing ring around Pittsburgh ────────────────────
+  const rings = [
+    { lat: PITTSBURGH_LAT, lng: PITTSBURGH_LON, maxR: 2.5, propagationSpeed: 2.5, repeatPeriod: 1800, color: '#CCFF00' },
+  ];
+
   return (
     <div
-      ref={mountRef}
-      className="w-full h-full min-h-[280px] md:min-h-[380px]"
-      style={{ cursor: 'grab' }}
-    />
+      ref={containerRef}
+      className="w-full h-full min-h-[380px] md:min-h-[540px] relative"
+    >
+      {/* Popup label on hover */}
+      {popupVisible && (
+        <div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
+          style={{ animation: 'popupEnter 0.25s cubic-bezier(0.4,0,0.2,1) forwards' }}
+        >
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl px-5 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-sm">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div
+                className="w-[9px] h-[9px] rounded-full shadow-[0_0_10px_#CCFF00]"
+                style={{ background: 'rgba(204,255,0,0.45)', border: '2px solid #CCFF00' }}
+              />
+              <span className="text-[14px] font-bold text-[var(--text-primary)] font-display tracking-[-0.01em]">
+                Pittsburgh, PA
+              </span>
+              <span className="text-[10.5px] text-[var(--text-muted)] font-mono">
+                40.44°N 79.99°W
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-[--text-secondary] font-body">
+              <span className="inline-flex items-center gap-1.5">
+                <GraduationCap size={13} color="var(--accent-blue)" />
+                Carnegie Mellon University
+              </span>
+              <span className="text-[--text-muted]">·</span>
+              <span className="inline-flex items-center gap-1.5 font-mono text-[--accent-blue]">
+                {pghTime || '--:--:--'} EST/EDT
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <GlobeGL
+        ref={globeEl}
+        width={dims.w}
+        height={dims.h}
+        globeImageUrl={GLOBE_IMAGE_URL}
+        backgroundColor="rgba(0,0,0,0)"
+        showAtmosphere
+        atmosphereColor="#4fc3f7"
+        atmosphereAltitude={0.15}
+        pointsData={points}
+        pointColor="color"
+        pointRadius={2.75}
+        onPointHover={(point) => {
+          if (hideTimer.current) {
+            clearTimeout(hideTimer.current);
+            hideTimer.current = null;
+          }
+          if (point !== null) {
+            setPopupVisible(true);
+          } else {
+            hideTimer.current = setTimeout(() => setPopupVisible(false), 1000);
+          }
+        }}
+        ringsData={rings}
+        ringColor="color"
+        ringMaxRadius="maxR"
+        ringPropagationSpeed="propagationSpeed"
+        ringRepeatPeriod="repeatPeriod"
+      />
+
+      <style>{`
+        @keyframes popupEnter {
+          from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+      `}</style>
+    </div>
   );
 }

@@ -3,8 +3,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Projects } from './components/Projects';
-import { Research } from './components/Research';
+import { Experiences } from './components/Experiences';
 import { Skills } from './components/Skills';
+import { Certifications } from './components/Certifications';
+import { Research } from './components/Research';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { Archive } from './pages/Archive';
@@ -19,8 +21,10 @@ function HomePage() {
     >
       <Hero />
       <Projects />
-      <Research />
       <Skills />
+      <Certifications />
+      <Research />
+      <Experiences />
       <Contact />
       <Footer />
     </motion.div>

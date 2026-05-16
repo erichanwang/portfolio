@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MapPin, Phone, Mail, Copy, Check } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
-import { Certifications } from './Certifications';
 
 interface ContactItem {
   icon: 'MapPin' | 'Phone' | 'Mail';
@@ -129,8 +128,6 @@ export function Contact() {
         ))}
       </div>
 
-      {/* Certifications (hidden by default) */}
-      <Certifications />
     </section>
   );
 }

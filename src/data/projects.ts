@@ -24,6 +24,26 @@ export const iconMap: Record<string, LucideIcon> = {
   Type,
 };
 
+// ── Projects ────────────────────────────────────────────
+//
+// How to add a new repo:
+//   1. Copy the template below
+//   2. Pick an icon name from the iconMap above (e.g. 'Cpu', 'Brain', 'Atom')
+//   3. Choose a tier: 'featured' (shown by default) or 'notable' (shown when expanding)
+//   4. Add to the end of the projects array
+//
+// ── Template ─────────────────────────────────────────────
+// {
+//   title: 'My New Project',
+//   year: 2025,
+//   desc: 'Short description of what the project does.',
+//   tags: ['Python', 'ML'],
+//   repo: 'https://github.com/erichanwang/my-new-project',
+//   icon: 'Brain',       // pick from iconMap keys
+//   tier: 'featured',     // 'featured' | 'notable'
+//   image: null,
+// },
+//
 export const projects: Project[] = [
   {
     title: 'Compiler',
@@ -82,6 +102,16 @@ export const projects: Project[] = [
     tags: ['C++', 'Algorithms', 'Visualization'],
     repo: 'https://github.com/erichanwang/Path-Finding-Algorithms',
     icon: 'Map',
+    tier: 'featured',
+    image: null,
+  },
+  {
+    title: 'Quaternions',
+    year: 2024,
+    desc: 'Quaternion algebra library and 3D rotation visualizer — slerp, rotation compositing, and interactive orientation demo.',
+    tags: ['C++', 'Math', '3D Graphics'],
+    repo: 'https://github.com/erichanwang/quaternions',
+    icon: 'Box',
     tier: 'featured',
     image: null,
   },

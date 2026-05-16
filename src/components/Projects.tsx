@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ExternalLink, Code2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { projects, iconMap, type Project } from '../data/projects';
@@ -96,35 +95,20 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 }
 
 export function Projects() {
-  const [showAll, setShowAll] = useState(false);
-
-  const featured = projects.filter((p) => p.tier === 'featured');
-  const notable = projects.filter((p) => p.tier === 'notable');
-  const displayed = showAll ? projects : featured;
+  // Top 9 projects — always a full 3×3 grid on desktop, single column on mobile
+  const displayed = projects.slice(0, 9);
 
   return (
     <section id="projects" className="max-w-[960px] mx-auto px-5 md:px-10 py-20 md:py-24">
       <SectionHeader label="// featured projects" />
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <AnimatePresence>
           {displayed.map((project, i) => (
             <ProjectCard key={project.title} project={project} index={i} />
           ))}
         </AnimatePresence>
       </div>
-
-      {notable.length > 0 && (
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => setShowAll(!showAll)}
-            className="text-[13px] text-[--accent-blue] hover:text-[#81d4fa] font-mono bg-transparent border-0 cursor-pointer transition-colors duration-200 underline decoration-[rgba(79,195,247,0.25)] underline-offset-4"
-            style={{ fontFamily: "'DM Mono', monospace" }}
-          >
-            {showAll ? 'Show fewer projects ↑' : `Show more projects (${notable.length} more) ↓`}
-          </button>
-        </div>
-      )}
 
       <div className="mt-6 text-center">
         <a

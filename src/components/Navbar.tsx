@@ -28,8 +28,9 @@ export function Navbar() {
 
   const navLinks = [
     { label: 'Projects', href: '#projects' },
-    { label: 'Research', href: '#research' },
     { label: 'Skills', href: '#skills' },
+    { label: 'Research', href: '#research' },
+    { label: 'Experience', href: '#experiences' },
     { label: 'Contact', href: '#contact' },
   ];
 
