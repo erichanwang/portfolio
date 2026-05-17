@@ -9,8 +9,8 @@ export const skillCategories: SkillCategory[] = [
     id: 'languages',
     label: 'Languages',
     skills: [
-      'Python', 'Java', 'C', 'C++', 'C#', 'Go', 'Kotlin',
-      'Ruby', 'PHP', 'Bash / Shell', 'JavaScript', 'TypeScript', 'GDScript',
+      'Python (2, 3)', 'Java (21, 24)', 'C', 'C++ (11, 17, 23)', 'C#', 'Go', 'Kotlin',
+      'Ruby', 'PHP', 'Bash / Shell', 'JavaScript', 'Julia', 'Swift', 'TypeScript', 'GDScript',
     ],
   },
   {

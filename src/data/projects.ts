@@ -47,7 +47,7 @@ export const iconMap: Record<string, LucideIcon> = {
 export const projects: Project[] = [
   {
     title: 'Compiler',
-    year: 2024,
+    year: 2025,
     desc: 'Custom language that compiles to C++. Lexer, parser, AST, and code generation — built from scratch.',
     tags: ['C++', 'Systems', 'PL Theory'],
     repo: 'https://github.com/erichanwang/Compiler',
@@ -57,7 +57,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Physics Engine',
-    year: 2024,
+    year: 2025,
     desc: 'Low-level rigid-body physics engine in C with collision detection and constraint solving.',
     tags: ['C', 'Simulation', 'Math'],
     repo: 'https://github.com/erichanwang/Physics-Engine',
@@ -67,7 +67,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Neural Network',
-    year: 2023,
+    year: 2025,
     desc: 'ML framework built from scratch — trained agents across multiple game environments.',
     tags: ['Python', 'ML', 'Deep Learning'],
     repo: 'https://github.com/erichanwang/neural-network',
@@ -77,7 +77,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Reinforcement Learning',
-    year: 2023,
+    year: 2025,
     desc: 'RL algorithms implemented and benchmarked across Pacman environments.',
     tags: ['Python', 'RL', 'AI'],
     repo: 'https://github.com/erichanwang/ReinforcementLearning',
@@ -87,7 +87,7 @@ export const projects: Project[] = [
   },
   {
     title: "Rubik's Cube Simulation",
-    year: 2023,
+    year: 2025,
     desc: 'Full 3D Rubik\'s cube with rotations, move sequences, and visual rendering.',
     tags: ['Python', '3D', 'Algorithms'],
     repo: 'https://github.com/erichanwang/cube3d',
@@ -97,7 +97,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Path-Finding Algorithms',
-    year: 2022,
+    year: 2025,
     desc: 'Interactive visualizer for A*, Dijkstra, BFS, DFS with real-time grid editing.',
     tags: ['C++', 'Algorithms', 'Visualization'],
     repo: 'https://github.com/erichanwang/Path-Finding-Algorithms',
@@ -117,7 +117,7 @@ export const projects: Project[] = [
   },
   {
     title: 'ODE Solver',
-    year: 2023,
+    year: 2025,
     desc: 'Differential equation solver using Runge-Kutta and Euler methods with graphical output.',
     tags: ['Python', 'Numerical Analysis', 'Math'],
     repo: 'https://github.com/erichanwang/diff-eq-solver',
@@ -127,7 +127,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Infinite Wordle',
-    year: 2022,
+    year: 2025,
     desc: 'Unlimited Wordle clone with randomized word selection and streak tracking.',
     tags: ['JavaScript', 'Web'],
     repo: 'https://github.com/erichanwang/infinite-wordle',

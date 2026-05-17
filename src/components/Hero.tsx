@@ -76,8 +76,8 @@ export function Hero() {
 
   const taglineItems = [
     { text: 'CS + AI @ Carnegie Mellon University \'2030' },
-    { text: 'Neuromorphic Computing \u00b7 Quantum Systems \u00b7 Bio-Inspired Architectures' },
-    { text: 'Building at the intersection of computation and nature' },
+    { text: 'Neuromorphic & Quantum Computing, Bio-inspired Architectures' },
+    { text: 'Where computation meets nature' },
   ];
 
   const stats = [
@@ -93,7 +93,7 @@ export function Hero() {
   };
 
   return (
-    <section className="min-h-screen flex items-center px-5 md:px-10 max-w-[1200px] mx-auto relative">
+    <section className="min-h-screen flex items-center px-5 md:px-10 max-w-[1200px] mx-auto relative overflow-hidden">
       {/* Ambient glow */}
       <div
         className="absolute top-[20%] -left-[10%] w-[500px] h-[500px] pointer-events-none"
@@ -152,7 +152,7 @@ export function Hero() {
 
         {/* Tagline */}
         <ul
-          className="mt-7 space-y-2.5 max-w-[580px] list-none p-0"
+          className="mt-7 space-y-2.5 list-none p-0"
         >
           {taglineItems.map((item, i) => (
             <li
@@ -241,7 +241,7 @@ export function Hero() {
       </div>
 
       {/* Right side — 3D Globe (hidden on mobile) */}
-      <div className="hidden md:block w-[440px] lg:w-[580px] shrink-0 ml-4 lg:ml-8 sticky top-24 self-start">
+      <div className="hidden md:block w-[500px] lg:w-[680px] shrink-0 ml-auto -mr-10 lg:-mr-16 sticky top-24 self-start">
         <Globe />
       </div>
 
